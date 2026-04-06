@@ -1,23 +1,19 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#9651db" fill="none">
-<g id="SVGRepo_bgCarrier" stroke-width="0"/>
-<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-<g id="SVGRepo_iconCarrier">
-<circle cx="34.52" cy="11.43" r="5.82"/>
-<circle cx="53.63" cy="31.6" r="5.82"/>
-<circle cx="34.52" cy="50.57" r="5.82"/>
-<circle cx="15.16" cy="42.03" r="5.82"/>
-<circle cx="15.16" cy="19.27" r="5.82"/>
-<circle cx="34.51" cy="29.27" r="4.7"/>
-<line x1="20.17" y1="16.3" x2="28.9" y2="12.93"/>
-<line x1="38.6" y1="15.59" x2="49.48" y2="27.52"/>
-<line x1="50.07" y1="36.2" x2="38.67" y2="46.49"/>
-<line x1="18.36" y1="24.13" x2="30.91" y2="46.01"/>
-<line x1="20.31" y1="44.74" x2="28.7" y2="48.63"/>
-<line x1="17.34" y1="36.63" x2="31.37" y2="16.32"/>
-<line x1="20.52" y1="21.55" x2="30.34" y2="27.1"/>
-<line x1="39.22" y1="29.8" x2="47.81" y2="30.45"/>
-<line x1="34.51" y1="33.98" x2="34.52" y2="44.74"/>
+<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<style>.cls-1{fill:#4285f4;}.cls-1,.cls-2,.cls-4{fill-rule:evenodd;}.cls-2{fill:#1e88e5;}.cls-3,.cls-4{fill:#aecbfa;}.cls-5{fill:#669df6;}</style>
+</defs>
+<title>Icon_24px_AIHub_Color</title>
+<g data-name="Product Icons">
+<polygon class="cls-1" points="20.69 12.43 12 16.78 12 22 20.69 17.65 20.69 12.43"/>
+<path class="cls-2" d="M6.78,4.61,3.31,6.35Z"/>
+<polygon class="cls-1" points="17.22 8.09 17.22 8.09 17.22 12.43 20.69 10.7 20.69 6.35 17.22 8.09"/>
+<polygon class="cls-1" points="12 15.04 15.48 13.31 15.48 8.96 15.48 8.96 12 10.7 12 15.04"/>
+<polygon class="cls-3" points="6.78 4.61 3.31 6.35 6.78 8.09 10.26 6.35 6.78 4.61"/>
+<polygon class="cls-4" points="12 2 8.52 3.74 12 5.48 17.22 8.09 20.69 6.35 12 2"/>
+<polygon class="cls-3" points="12 7.22 8.52 8.96 12 10.7 15.48 8.96 12 7.22"/>
+<path class="cls-5" d="M8.52,15v5.22L12,22V16.78Zm2.61,5.22-1.74-.87V16.78l1.74.87Z"/>
+<path class="cls-5" d="M3.31,6.35v11.3l3.47,1.74V8.09Zm2.61,11.3-1.75-.87v-10l1.75.87Z"/>
+<path class="cls-5" d="M8.52,9,12,10.7V15L8.52,13.31Zm2.61,4.35v-3L9.39,9.45v3Z"/>
 </g>
 </svg>
