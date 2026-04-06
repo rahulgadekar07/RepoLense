@@ -1,0 +1,41 @@
+{
+  "message": "Repository analyzed successfully 🚀",
+  "totalFiles": 11,
+  "languages": [
+    "html",
+    "json",
+    "jsx",
+    "scss",
+    "css",
+    "js"
+  ],
+  "techStack": [
+    "React",
+    "Vite"
+  ],
+  "cached": false,
+  "aiAnalysis": {
+    "project_understanding": {
+      "project_summary": "This is a full-stack e-commerce app built with React and Vite for buying and selling products online.",
+      "tech_stack": [
+        "React",
+        "Vite"
+      ],
+      "architecture": "React frontend, Vite development server, unknown backend and data storage."
+    },
+    "diagrams": {
+      "diagrams": [
+        {
+          "type": "ClassDiagram",
+          "name": "Data Models",
+          "mermaid": "classDiagram\nclass Product {\n  +id\n  +name\n  +price\n}\nclass Order {\n  +id\n  +totalPrice\n}\nclass Customer {\n  +id\n  +name\n  +email\n}\nProduct --> Order : contains\nCustomer --> Order : places"
+        },
+        {
+          "type": "ERDiagram",
+          "name": "Database Schema",
+          "mermaid": "erDiagram\nPRODUCT {\n  int id\n  string name\n  decimal price\n}\nORDER {\n  int id\n  decimal totalPrice\n  int productId\n}\nCUSTOMER {\n  int id\n  string name\n  string email\n}\nPRODUCT ||--o{ ORDER : contains\nCUSTOMER ||--o{ ORDER : places"
+        }
+      ]
+    }
+  }
+}

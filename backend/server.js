@@ -9,6 +9,7 @@ const cleanJSON = require("./utils/cleanJSON");
 const {
   scanDirectory,
   detectLanguages,
+  detectTechStack,
   getReadme,
   getPackageJsonDependencies,
   buildFolderTree
@@ -36,19 +37,27 @@ app.get("/", (req, res) => {
 });
 
 // MAIN API
+// ✅ Supports ?refresh=true to bust cache
 app.post("/analyze-repo", async (req, res) => {
   try {
     const { repoUrl } = req.body;
-    console.log("Incoming repo:", repoUrl);
+    const forceRefresh = req.query.refresh === "true";  // ✅ cache invalidation
+
+    console.log("Incoming repo:", repoUrl, forceRefresh ? "🔄 FORCE REFRESH" : "");
 
     const repoId = getRepoId(repoUrl);
     const cachePath = path.join(CACHE_DIR, repoId + ".json");
 
-    // STEP 1 — RETURN CACHE IF EXISTS
-    if (fs.existsSync(cachePath)) {
+    // STEP 1 — RETURN CACHE IF EXISTS (unless refresh requested)
+    if (fs.existsSync(cachePath) && !forceRefresh) {
       console.log("⚡ Cache hit — returning saved result");
       const cached = JSON.parse(fs.readFileSync(cachePath, "utf-8"));
-      return res.json(cached);
+      return res.json({ ...cached, cached: true });
+    }
+
+    if (forceRefresh && fs.existsSync(cachePath)) {
+      fs.unlinkSync(cachePath);
+      console.log("🗑️ Cache cleared for refresh");
     }
 
     // Prepare repo path
@@ -66,19 +75,30 @@ app.post("/analyze-repo", async (req, res) => {
 
     console.log("📂 Scanning repository...");
     const files = scanDirectory(repoPath);
+    if (!files || !Array.isArray(files)) {
+      console.error('💥 scanDirectory returned invalid result:', files);
+      files = [];
+    }
+    console.log(`📂 Total files scanned: ${files.length}`);
+    
     const languages = detectLanguages(files);
-    const readme = getReadme(repoPath);           // ✅ was being lost before
-    const dependencies = getPackageJsonDependencies(repoPath);
+    const readme = getReadme(repoPath);
+const dependencies = getPackageJsonDependencies(repoPath, files);
     const folderTree = buildFolderTree(repoPath, 2);
+
+    // ✅ Real tech stack from file contents (React, MongoDB, Express — not just "js")
+    const techStack = detectTechStack(repoPath, files);
+    console.log("🔍 Detected tech stack:", techStack);
 
     const importantFiles = filterImportantFiles(files);
 
     const repoData = {
       files: importantFiles,
       languages,
+      techStack,       // ✅ real stack passed to AI
       dependencies,
       folderTree,
-      readme,   // ✅ now actually passed to AI
+      readme,
     };
 
     // STEP 3 — AI UNDERSTANDS PROJECT
@@ -92,7 +112,7 @@ app.post("/analyze-repo", async (req, res) => {
       console.log("⚠️ AI understanding failed:", err.message);
       understanding = {
         project_summary: `A ${languages.join("/")} project with ${files.length} files.`,
-        tech_stack: languages,
+        tech_stack: techStack.length > 0 ? techStack : languages,
         architecture: "Could not determine"
       };
     }
@@ -118,6 +138,8 @@ app.post("/analyze-repo", async (req, res) => {
       message: "Repository analyzed successfully 🚀",
       totalFiles: files.length,
       languages,
+      techStack,       // ✅ also exposed in response
+      cached: false,
       aiAnalysis: aiResult
     };
 
