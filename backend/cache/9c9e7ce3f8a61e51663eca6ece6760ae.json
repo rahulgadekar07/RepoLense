@@ -9,31 +9,30 @@
   ],
   "aiAnalysis": {
     "project_understanding": {
-      "project_summary": "Automatic fallback: AI could not complete analysis.",
+      "project_summary": "Node.js REST API with multiple controllers and services for managing users, payments, quizzes, sales items, scholarships, and admin functionality.",
       "tech_stack": [
-        "js",
-        "json",
-        "html",
-        "css"
+        "Node.js",
+        "JavaScript",
+        "JSON"
       ],
-      "architecture": "unknown"
+      "architecture": "Express backend with various controllers and services, no frontend included."
     },
     "diagrams": {
       "diagrams": [
         {
           "type": "Component",
-          "name": "High Level Architecture",
-          "mermaid": "graph TD\nUser --> Frontend\nFrontend --> Backend\nBackend --> Database"
+          "name": "System Overview",
+          "mermaid": "graph TD\nController --> Service\nService --> Repository\nRepository --> Database\nAdminUI --> Controller\nFrontend --> None"
         },
         {
           "type": "Flowchart",
-          "name": "User Request Flow",
-          "mermaid": "flowchart TD\nA[User] --> B[Frontend]\nB --> C[API]\nC --> D[Database]\nD --> C --> B --> A"
+          "name": "Request Flow",
+          "mermaid": "flowchart TD\nA[User Request] -->|HTTP| B[API Gateway]\nB --> C[Controller]\nC --> D[Service]\nD --> E[Database]\nE --> F[Response]"
         },
         {
           "type": "Sequence",
-          "name": "API Call Sequence",
-          "mermaid": "sequenceDiagram\nUser->>Frontend: Action\nFrontend->>Backend: API Call\nBackend->>DB: Query\nDB-->>Backend: Result\nBackend-->>Frontend: Response"
+          "name": "API Sequence",
+          "mermaid": "sequenceDiagram\nUser --> Controller: User Request\nController --> Service: Validate User\nService --> Database: Retrieve Data\nDatabase --> Service: Return Data\nService --> Controller: Response\nController --> User: API Response"
         }
       ]
     }
