@@ -1,0 +1,41 @@
+{
+  "message": "Repository analyzed successfully 🚀",
+  "totalFiles": 283,
+  "languages": [
+    "js",
+    "json",
+    "html",
+    "css"
+  ],
+  "aiAnalysis": {
+    "project_understanding": {
+      "project_summary": "Automatic fallback: AI could not complete analysis.",
+      "tech_stack": [
+        "js",
+        "json",
+        "html",
+        "css"
+      ],
+      "architecture": "unknown"
+    },
+    "diagrams": {
+      "diagrams": [
+        {
+          "type": "Component",
+          "name": "High Level Architecture",
+          "mermaid": "graph TD\nUser --> Frontend\nFrontend --> Backend\nBackend --> Database"
+        },
+        {
+          "type": "Flowchart",
+          "name": "User Request Flow",
+          "mermaid": "flowchart TD\nA[User] --> B[Frontend]\nB --> C[API]\nC --> D[Database]\nD --> C --> B --> A"
+        },
+        {
+          "type": "Sequence",
+          "name": "API Call Sequence",
+          "mermaid": "sequenceDiagram\nUser->>Frontend: Action\nFrontend->>Backend: API Call\nBackend->>DB: Query\nDB-->>Backend: Result\nBackend-->>Frontend: Response"
+        }
+      ]
+    }
+  }
+}
