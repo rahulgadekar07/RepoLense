@@ -42,7 +42,77 @@ function MermaidDiagram({ chart, title }) {
   )
 }
 
-// ─── DNA Helix Loading Animation ────────────────────────────────────────────
+// ─── Progress Bar ────────────────────────────────────────────────────────────
+function ProgressBar({ progress, message }) {
+  // Milestones for segment labels
+  const milestones = [
+    { pct: 25,  label: 'CLONE' },
+    { pct: 50,  label: 'UNDERSTAND' },
+    { pct: 75,  label: 'DIAGRAMS' },
+    { pct: 100, label: 'COMPLETE' },
+  ]
+
+  return (
+    <div className="progress-zone">
+      {/* Percentage + message */}
+      <div className="progress-header">
+        <span className="progress-pct">{progress}%</span>
+        <span className="progress-msg">
+          <span className="loading-prefix">{'>'}&nbsp;</span>
+          <span className="loading-text">{message}</span>
+          <ProgressDots />
+        </span>
+      </div>
+
+      {/* Main bar */}
+      <div className="progress-track">
+        <div
+          className="progress-fill"
+          style={{ width: `${progress}%` }}
+        />
+        {/* Milestone markers */}
+        {milestones.map(m => (
+          <div
+            key={m.pct}
+            className={`progress-marker ${progress >= m.pct ? 'reached' : ''}`}
+            style={{ left: `${m.pct}%` }}
+          >
+            <div className="marker-dot" />
+            <div className="marker-label">{m.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Stage indicators */}
+      <div className="stage-row">
+        {milestones.map((m, i) => {
+          const prevPct = i === 0 ? 0 : milestones[i - 1].pct
+          const active = progress > prevPct && progress <= m.pct
+          const done = progress > m.pct
+          return (
+            <div key={m.pct} className={`stage-box ${active ? 'active' : ''} ${done ? 'done' : ''}`}>
+              <span className="stage-num">0{i + 1}</span>
+              <span className="stage-label">{m.label}</span>
+              {done && <span className="stage-check">✓</span>}
+              {active && <span className="stage-spinner" />}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ProgressDots() {
+  const [dots, setDots] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setDots(d => (d + 1) % 4), 400)
+    return () => clearInterval(t)
+  }, [])
+  return <span className="loading-dots">{'·'.repeat(dots)}</span>
+}
+
+// ─── DNA Helix Loading Animation (kept for fallback / aesthetic) ─────────────
 function DNALoader() {
   const messages = [
     'CLONING REPOSITORY...',
@@ -192,28 +262,71 @@ function Results({ data }) {
 export default function App() {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [progressMsg, setProgressMsg] = useState('')
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [focused, setFocused] = useState(false)
+  const esRef = useRef(null)
+
+  // Clean up SSE on unmount
+  useEffect(() => () => esRef.current?.close(), [])
 
   async function analyze() {
     if (!url.trim()) return
+
+    // Close any existing SSE connection
+    esRef.current?.close()
+
     setLoading(true)
     setData(null)
     setError(null)
-    try {
-      const res = await fetch('http://localhost:5000/analyze-repo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repoUrl: url.trim() })
-      })
-      if (!res.ok) throw new Error(`Server error: ${res.status}`)
-      const json = await res.json()
-      setData(json)
-    } catch (e) {
-      setError(e.message)
-    } finally {
+    setProgress(0)
+    setProgressMsg('CONNECTING...')
+
+    const encodedUrl = encodeURIComponent(url.trim())
+    const sseUrl = `http://localhost:5000/analyze-repo-stream?url=${encodedUrl}`
+
+    const es = new EventSource(sseUrl)
+    esRef.current = es
+
+    es.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data)
+
+        if (payload.progress === -1) {
+          // Error from server
+          setError(payload.message || 'Server error')
+          setLoading(false)
+          es.close()
+          return
+        }
+
+        if (payload.progress === 100 && payload.result) {
+          // Final result
+          setProgress(100)
+          setProgressMsg(payload.message || 'COMPLETE')
+          // Small delay so user sees 100%
+          setTimeout(() => {
+            setData(payload.result)
+            setLoading(false)
+          }, 600)
+          es.close()
+          return
+        }
+
+        // Intermediate progress
+        setProgress(payload.progress ?? 0)
+        setProgressMsg(payload.message ?? '')
+      } catch (err) {
+        console.error('SSE parse error', err)
+      }
+    }
+
+    es.onerror = () => {
+      setError('Connection to server lost. Is the backend running?')
       setLoading(false)
+      es.close()
     }
   }
 
@@ -266,10 +379,11 @@ export default function App() {
         </button>
       </div>
 
-      {/* ── Loading ── */}
+      {/* ── Loading: DNA helix + progress bar side by side ── */}
       {loading && (
-        <div className="loading-zone">
+        <div className="loading-zone loading-zone--split">
           <DNALoader />
+          <ProgressBar progress={progress} message={progressMsg} />
         </div>
       )}
 

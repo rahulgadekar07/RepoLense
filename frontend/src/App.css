@@ -644,3 +644,241 @@ body {
   .logo-text { font-size: 1.8rem; }
   .diagrams-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ────────────────────────────────────────────────────────────────────────────
+   PROGRESS BAR  — paste these rules anywhere in App.css
+   (or append to the bottom)
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* ── Container ── */
+.progress-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 40px 0;
+  animation: fadeUp 0.4s ease both;
+  width: 100%;
+}
+
+/* ── Header row: percentage + message ── */
+.progress-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.progress-pct {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: var(--green);
+  text-shadow: var(--glow-green);
+  line-height: 1;
+  min-width: 5ch;
+  transition: all 0.3s ease;
+}
+
+.progress-msg {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ── Track + fill ── */
+.progress-track {
+  position: relative;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: visible;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 12px rgba(0, 255, 159, 0.6), 0 0 4px rgba(0, 229, 255, 0.4);
+  position: relative;
+}
+
+/* Glowing tip on the fill */
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan), 0 0 4px var(--green);
+}
+
+/* ── Milestone markers ── */
+.progress-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+/* Push label below the track */
+.marker-label {
+  position: absolute;
+  top: 14px;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.progress-marker.reached .marker-label {
+  color: var(--green);
+  text-shadow: var(--glow-green);
+}
+
+.marker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-marker.reached .marker-dot {
+  border-color: var(--green);
+  background: var(--green);
+  box-shadow: var(--glow-green);
+}
+
+/* ── Stage boxes ── */
+.stage-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 24px;  /* room for marker labels */
+}
+
+.stage-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 12px;
+  text-align: center;
+  position: relative;
+  transition: border-color 0.3s ease, background 0.3s ease;
+  overflow: hidden;
+}
+
+.stage-box.active {
+  border-color: var(--green);
+  background: rgba(0, 255, 159, 0.04);
+  box-shadow: inset 0 0 20px rgba(0, 255, 159, 0.05);
+}
+
+.stage-box.done {
+  border-color: rgba(0, 255, 159, 0.3);
+  background: rgba(0, 255, 159, 0.02);
+}
+
+.stage-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--border);
+  line-height: 1;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.stage-box.active .stage-num { color: var(--green); text-shadow: var(--glow-green); }
+.stage-box.done  .stage-num { color: var(--green-dim); }
+
+.stage-label {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  transition: color 0.3s ease;
+}
+
+.stage-box.active .stage-label { color: var(--green); }
+.stage-box.done  .stage-label { color: var(--green-dim); }
+
+/* Checkmark overlay for done state */
+.stage-check {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.65rem;
+  color: var(--green);
+  text-shadow: var(--glow-green);
+}
+
+/* Spinning dot for active state */
+.stage-spinner {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: var(--glow-green);
+  animation: pulse 1s ease infinite;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .stage-row { grid-template-columns: repeat(2, 1fr); }
+  .progress-pct { font-size: 1.8rem; }
+}
+
+/* ── Split loading layout: DNA helix + progress bar side by side ── */
+.loading-zone--split {
+  align-items: center;
+  gap: 48px;
+  justify-content: flex-start;
+}
+
+.loading-zone--split .dna-scene {
+  flex-shrink: 0;
+}
+
+.loading-zone--split .progress-zone {
+  flex: 1;
+  padding: 0;
+}
+
+/* ── Also override the base loading-zone to flex (already is, but ensure) ── */
+.loading-zone {
+  display: flex;
+  justify-content: center;
+  animation: fadeUp 0.4s ease both;
+}
+
+/* ── Responsive: stack on mobile ── */
+@media (max-width: 640px) {
+  .loading-zone--split {
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  .loading-zone--split .dna-scene {
+    padding: 20px 0 0;
+  }
+}
