@@ -40,14 +40,14 @@ Return ONLY the JSON object. No explanation. No markdown. Use the detected tech 
       console.log(`🧠 Understanding attempt ${attempt}...`);
 
       const res = await axios.post(OLLAMA_URL, {
-        model: "llama3:8b",
+        model: "mistral:7b",
         prompt,
         stream: false,
         options: {
-          num_predict: 250,
-          temperature: 0.1,
-          top_k: 10,
-          top_p: 0.9,
+          num_predict: 300,
+          temperature: 0.2,
+          top_k: 40,
+          top_p: 0.95,
         },
       }, { timeout: 120000 });
 

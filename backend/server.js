@@ -17,6 +17,7 @@ const {
 const { filterImportantFiles } = require("./repoFilter");
 const aiUnderstandRepo = require("./aiUnderstandRepo");
 const aiGenerateDiagrams = require("./aiGenerateDiagrams");
+const { runComprehensiveAnalysis } = require("./comprehensiveAnalyzer");
 
 function getRepoId(repoUrl) {
   return crypto.createHash("md5").update(repoUrl).digest("hex");
@@ -179,8 +180,54 @@ app.get("/analyze-repo-stream", async (req, res) => {
 
     sendProgress(res, 75, `DIAGRAMS READY · ${diagrams?.diagrams?.length || 0} GENERATED`);
 
-    // ── STEP 4 — FINALIZE (75 → 100%) ──────────────────────────────────────
-    sendProgress(res, 85, "ASSEMBLING FINAL REPORT...");
+    // ── STEP 4.5 — COMPREHENSIVE ANALYSIS (75 → 88%) ────────────────────────
+    sendProgress(res, 78, "ANALYZING CODE QUALITY...");
+    await delay(150);
+    sendProgress(res, 80, "CHECKING SECURITY...");
+    await delay(150);
+    sendProgress(res, 82, "ANALYZING GIT HEALTH...");
+    await delay(150);
+    sendProgress(res, 85, "CHECKING PERFORMANCE...");
+
+    console.log("🔍 Running comprehensive analysis...");
+    let comprehensiveAnalysis = await runComprehensiveAnalysis(repoPath, {
+      files: files, // Use full files array, not filtered
+      languages,
+      techStack,
+      dependencies,
+      folderTree,
+      readme,
+      name: repoName
+    });
+
+    // Fallback if analysis failed
+    if (comprehensiveAnalysis.error) {
+      console.log("⚠️ Comprehensive analysis had error:", comprehensiveAnalysis.message);
+      comprehensiveAnalysis = {
+        analysis: {
+          codeQuality: { codeQuality: { score: 0, complexity: {}, duplication: 0 } },
+          security: { security: { score: 0, vulnerabilities: [] } },
+          gitHealth: { gitHealth: { healthScore: 0 } },
+          performance: { performance: { healthScore: 0 } },
+          projectMaturity: { projectMaturity: { overallScore: 0 } },
+        },
+        visualizations: {},
+        summary: { overallHealthScore: 0, status: "Analysis Unavailable" },
+      };
+    }
+
+    console.log("📊 Analysis complete:", {
+      codeQuality: comprehensiveAnalysis.analysis?.codeQuality?.codeQuality?.score,
+      security: comprehensiveAnalysis.analysis?.security?.security?.score,
+      gitHealth: comprehensiveAnalysis.analysis?.gitHealth?.gitHealth?.healthScore,
+      performance: comprehensiveAnalysis.analysis?.performance?.performance?.healthScore,
+    });
+
+    sendProgress(res, 88, "ANALYSIS COMPLETE · GENERATING REPORT...");
+    await delay(200);
+
+    // ── STEP 5 — FINALIZE (88 → 100%) ──────────────────────────────────────
+    sendProgress(res, 90, "ASSEMBLING FINAL REPORT...");
     await delay(300);
 
     const aiResult = {
@@ -194,7 +241,10 @@ app.get("/analyze-repo-stream", async (req, res) => {
       languages,
       techStack,
       cached: false,
-      aiAnalysis: aiResult
+      aiAnalysis: aiResult,
+      analysis: comprehensiveAnalysis.analysis,
+      visualizations: comprehensiveAnalysis.visualizations,
+      summary: comprehensiveAnalysis.summary,
     };
 
     // Save cache

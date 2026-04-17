@@ -180,10 +180,48 @@ function Badge({ label }) {
   return <span className="badge">{label}</span>
 }
 
+// ─── Score Badge ─────────────────────────────────────────────────────────────
+function ScoreBadge({ label, value, max = 100 }) {
+  const pct = (value / max) * 100
+  let color = pct >= 75 ? '#00ff9f' : pct >= 50 ? '#ffaa00' : '#ff4444'
+  return (
+    <div className="score-badge">
+      <div className="score-label">{label}</div>
+      <div className="score-bar">
+        <div className="score-fill" style={{ width: `${pct}%`, backgroundColor: color }} />
+      </div>
+      <div className="score-value">{Math.round(value)}/100</div>
+    </div>
+  )
+}
+
+// ─── Expandable Section ──────────────────────────────────────────────────────
+function ExpandableSection({ title, children, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className="expandable-section">
+      <div className="expandable-header" onClick={() => setOpen(!open)}>
+        <span className="expand-icon">{open ? '▼' : '▶'}</span>
+        <span className="expand-title">{title}</span>
+      </div>
+      {open && <div className="expandable-content">{children}</div>}
+    </div>
+  )
+}
+
 // ─── Results Panel ───────────────────────────────────────────────────────────
 function Results({ data }) {
   const u = data.aiAnalysis?.project_understanding
   const diagrams = data.aiAnalysis?.diagrams?.diagrams || []
+  const analysis = data.analysis || {}
+  const visualizations = data.visualizations || {}
+  const summary = data.summary || {}
+
+  const codeQuality = analysis.codeQuality?.codeQuality || {}
+  const security = analysis.security?.security || {}
+  const gitHealth = analysis.gitHealth?.gitHealth || {}
+  const performance = analysis.performance?.performance || {}
+  const maturity = analysis.projectMaturity?.projectMaturity || {}
 
   return (
     <div className="results-panel">
@@ -216,6 +254,24 @@ function Results({ data }) {
         </div>
       </div>
 
+      {/* Overall Health Score */}
+      {summary.overallHealthScore !== undefined && (
+        <div className="section">
+          <div className="section-label">▸ 🎯 OVERALL HEALTH SCORE</div>
+          <div className="health-summary">
+            <div className="health-main">
+              <div className="health-score">{Math.round(summary.overallHealthScore)}%</div>
+              <div className="health-status">{summary.status || 'Analyzing...'}</div>
+            </div>
+            <div className="health-details">
+              {summary.keyInsights?.slice(0, 3).map((insight, i) => (
+                <div key={i} className="insight-item">✓ {insight}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Tech stack badges */}
       <div className="section">
         <div className="section-label">▸ TECH STACK</div>
@@ -241,6 +297,101 @@ function Results({ data }) {
           <div className="section-label">▸ ARCHITECTURE</div>
           <div className="summary-box arch">{u.architecture}</div>
         </div>
+      )}
+
+      {/* Analysis Scores Row */}
+      {(codeQuality.score !== undefined || security.score !== undefined || gitHealth.healthScore !== undefined || performance.healthScore !== undefined) && (
+        <div className="section">
+          <div className="section-label">▸ ANALYSIS SCORES</div>
+          <div className="scores-grid">
+            {codeQuality.score !== undefined && <ScoreBadge label="Code Quality" value={codeQuality.score} />}
+            {security.score !== undefined && <ScoreBadge label="Security" value={security.score} />}
+            {gitHealth.healthScore !== undefined && <ScoreBadge label="Git Health" value={gitHealth.healthScore} />}
+            {performance.healthScore !== undefined && <ScoreBadge label="Performance" value={performance.healthScore} />}
+          </div>
+        </div>
+      )}
+
+      {/* Code Quality Details */}
+      {codeQuality.score !== undefined && (
+        <ExpandableSection title={`📊 Code Quality (${Math.round(codeQuality.score)}/100)`}>
+          <div className="detail-box">
+            {codeQuality.complexity && <div className="detail-line"><strong>Avg Complexity:</strong> {codeQuality.complexity.average?.toFixed(2)}</div>}
+            {codeQuality.duplication && <div className="detail-line"><strong>Duplication:</strong> {codeQuality.duplication}%</div>}
+            {codeQuality.commentDensity && <div className="detail-line"><strong>Comment Density:</strong> {codeQuality.commentDensity}%</div>}
+            {codeQuality.codeSmells?.length > 0 && (
+              <div className="detail-line">
+                <strong>Issues Found:</strong> {codeQuality.codeSmells.length}
+              </div>
+            )}
+          </div>
+        </ExpandableSection>
+      )}
+
+      {/* Security Details */}
+      {security.score !== undefined && (
+        <ExpandableSection title={`🔒 Security (${Math.round(security.score)}/100)`}>
+          <div className="detail-box">
+            {security.secretsFound?.length > 0 && (
+              <div className="detail-line alert-danger">
+                ⚠️ <strong>{security.secretsFound.length} Hardcoded Secrets Found</strong>
+              </div>
+            )}
+            {security.vulnerabilities?.length > 0 && (
+              <div className="detail-line alert-danger">
+                ⚠️ <strong>{security.vulnerabilities.length} Vulnerable Packages</strong>
+              </div>
+            )}
+            {security.outdatedPackages?.length > 0 && (
+              <div className="detail-line alert-warning">
+                ⚠️ <strong>{security.outdatedPackages.length} Outdated Packages</strong>
+              </div>
+            )}
+            {security.riskLevel && <div className="detail-line"><strong>Risk Level:</strong> {security.riskLevel}</div>}
+          </div>
+        </ExpandableSection>
+      )}
+
+      {/* Git Health Details */}
+      {gitHealth.healthScore !== undefined && (
+        <ExpandableSection title={`📈 Git Health (${Math.round(gitHealth.healthScore)}/100)`}>
+          <div className="detail-box">
+            {gitHealth.commits && <div className="detail-line"><strong>Total Commits:</strong> {gitHealth.commits}</div>}
+            {gitHealth.contributors && <div className="detail-line"><strong>Contributors:</strong> {gitHealth.contributors}</div>}
+            {gitHealth.frequency && <div className="detail-line"><strong>Activity:</strong> {gitHealth.frequency}</div>}
+            {gitHealth.branchStrategy && <div className="detail-line"><strong>Branch Strategy:</strong> {gitHealth.branchStrategy}</div>}
+          </div>
+        </ExpandableSection>
+      )}
+
+      {/* Performance Details */}
+      {performance.healthScore !== undefined && (
+        <ExpandableSection title={`⚡ Performance (${Math.round(performance.healthScore)}/100)`}>
+          <div className="detail-box">
+            {performance.bundleSize && <div className="detail-line"><strong>Bundle Size:</strong> {(performance.bundleSize / 1024 / 1024).toFixed(2)} MB</div>}
+            {performance.largeFiles?.length > 0 && (
+              <div className="detail-line"><strong>Large Files:</strong> {performance.largeFiles.length} files</div>
+            )}
+            {performance.unusedDependencies?.length > 0 && (
+              <div className="detail-line alert-warning"><strong>Unused Dependencies:</strong> {performance.unusedDependencies.length}</div>
+            )}
+            {performance.avgImportDepth && <div className="detail-line"><strong>Avg Import Depth:</strong> {performance.avgImportDepth.toFixed(1)}</div>}
+          </div>
+        </ExpandableSection>
+      )}
+
+      {/* Project Maturity */}
+      {maturity.overallScore !== undefined && (
+        <ExpandableSection title={`🏆 Project Maturity (${Math.round(maturity.overallScore)}/100)`}>
+          <div className="detail-box">
+            {maturity.level && <div className="detail-line"><strong>Maturity Level:</strong> {maturity.level}</div>}
+            {maturity.hasTests && <div className="detail-line">✓ Has Tests</div>}
+            {maturity.hasCICD && <div className="detail-line">✓ Has CI/CD</div>}
+            {maturity.hasDocumentation && <div className="detail-line">✓ Has Documentation</div>}
+            {maturity.hasLicense && <div className="detail-line">✓ Has License</div>}
+            {maturity.hasChangelog && <div className="detail-line">✓ Has Changelog</div>}
+          </div>
+        </ExpandableSection>
       )}
 
       {/* Diagrams */}
